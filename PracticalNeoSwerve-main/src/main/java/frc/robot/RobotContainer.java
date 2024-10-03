@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.commands.*;
+import frc.robot.subsystems.Flywheel;
 import frc.robot.subsystems.PoseEstimator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.swerve.Swerve;
@@ -62,6 +63,7 @@ public class RobotContainer {
     private final Swerve s_Swerve = new Swerve();
     private final Intake s_Intake = new Intake();
     private final PoseEstimator s_PoseEstimator = new PoseEstimator();
+    private final Flywheel s_Flywheel = new Flywheel();
 
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
