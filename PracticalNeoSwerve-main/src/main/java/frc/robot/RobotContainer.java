@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.commands.*;
 import frc.robot.subsystems.PoseEstimator;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.swerve.Swerve;
 
 import frc.robot.autos.exampleAuto;
@@ -49,7 +50,9 @@ public class RobotContainer {
     private final JoystickButton robotCentric = new JoystickButton(driver, XboxController.Button.kLeftBumper.value);
 
     private final JoystickButton dampen = new JoystickButton(driver, XboxController.Button.kRightBumper.value);
-
+    
+    private final JoystickButton intake = new JoystickButton(driver, XboxController.Button.kRightTrigger.value);
+	
     private final POVButton up = new POVButton(driver, 90);
     private final POVButton down = new POVButton(driver, 270);
     private final POVButton right = new POVButton(driver, 180);
@@ -57,6 +60,7 @@ public class RobotContainer {
 
     /* Subsystems */
     private final Swerve s_Swerve = new Swerve();
+    private final Intake s_Intake = new Intake();
     private final PoseEstimator s_PoseEstimator = new PoseEstimator();
 
 
@@ -90,6 +94,7 @@ public class RobotContainer {
     private void configureButtonBindings() {
         /* Driver Buttons */
         zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroGyro()));
+	intake.onTrue(new InstantCommand(() -> s_Intake.intake()));
 
 
         //heading lock bindings
