@@ -6,7 +6,11 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.math.controller.PIDController;
+import frc.robot.SwerveConstants.AutoConstants;
+import frc.robot.subsystems.swerve.SwerveConfig;
 import java.text.BreakIterator;
 
 import com.ctre.phoenix.sensors.Pigeon2;
@@ -16,6 +20,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.proto.Kinematics;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -45,6 +51,30 @@ public class Swerve extends SubsystemBase {
 
         swerveOdometry = new SwerveDriveOdometry(SwerveConfig.swerveKinematics, getYaw(), getModulePositions());
         zeroGyro();
+
+
+            AutoBuilder.configureHolonomic(
+            this::getPose, // Robot pose supplier
+            this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
+            this::getSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds            new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
+            SwerveConfig.pathFollowerConfig,
+
+            () -> {
+              // Boolean supplier that controls when the path will be mirrored for the red alliance
+              // This will flip the path being followed to the red side of the field.
+              // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+              var alliance = DriverStation.getAlliance();
+              if (alliance.isPresent()) {
+                return alliance.get() == DriverStation.Alliance.Red;
+              }
+              return false;
+            },
+            this // Reference to this subsystem to set requirements
+            );
+
+
 
     }
     private static ChassisSpeeds correctForDynamics(ChassisSpeeds originalSpeeds) {
@@ -84,7 +114,17 @@ public class Swerve extends SubsystemBase {
             mod.setDesiredState(swerveModuleStates[mod.getModuleNumber()], isOpenLoop);
         }
 
+
     }    
+
+
+    public void driveRobotRelative(ChassisSpeeds robotRelativeSpeeds) {
+        ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(robotRelativeSpeeds, 0.02); 
+        SwerveModuleState[] targetStates = SwerveConfig.swerveKinematics.toSwerveModuleStates(targetSpeeds);
+        setModuleStates(targetStates);
+    }
+    
+
     /* Used by SwerveControllerCommand in Auto */
     public void setModuleStates(SwerveModuleState[] desiredStates) {
 
@@ -111,6 +151,11 @@ public class Swerve extends SubsystemBase {
             states[mod.getModuleNumber()] = mod.getState();
         }
         return states;
+    }
+
+
+    public ChassisSpeeds getSpeeds() {
+        return SwerveConfig.swerveKinematics.toChassisSpeeds(getModuleStates());
     }
 
     public SwerveModulePosition[] getModulePositions() {
@@ -151,6 +196,10 @@ public class Swerve extends SubsystemBase {
         for(SwerveModule mod : mSwerveMods) {
 
             SmartDashboard.putNumber("REV Mod " + mod.getModuleNumber() + " Velocity", mod.getState().speedMetersPerSecond); 
+     
         }
     }
+
+
+
 }

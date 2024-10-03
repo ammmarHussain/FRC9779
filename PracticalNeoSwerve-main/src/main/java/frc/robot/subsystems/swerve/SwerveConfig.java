@@ -4,6 +4,9 @@ import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import com.ctre.phoenix.sensors.SensorTimeBase;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -102,11 +105,14 @@ public class SwerveConfig
     public static final double maxSpeed = 4.0;
     /** Radians per Second */
     public static final double maxAngularVelocity = 5.0; //max 10 or.....
-    public static final double maxAutonSpeed = 4.0/4;
-    public static final double maxAutonAngularVelocity = 5.0/10;
-
-
- 
+    
+    public static final HolonomicPathFollowerConfig pathFollowerConfig = new HolonomicPathFollowerConfig(
+        new PIDConstants(1,0,0),
+        new PIDConstants(1,0,0),
+        maxSpeed,
+        24.975/2,
+        new ReplanningConfig()
+        );
  
    
 

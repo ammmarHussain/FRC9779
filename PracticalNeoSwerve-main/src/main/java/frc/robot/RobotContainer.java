@@ -2,6 +2,8 @@ package frc.robot;
 
 import java.util.List;
 
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -118,7 +120,7 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
             // 1. Create trajectory settings
-            return new exampleAuto(s_Swerve);
+            return new PathPlannerAuto("test");
         
     }
 }

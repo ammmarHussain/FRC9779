@@ -66,7 +66,7 @@ public final class SwerveConstants
             public static final int driveMotorID = 11;
             public static final int angleMotorID = 12;
             public static final int canCoderID = 4  ;
-            public static final Rotation2d angleOffset = Rotation2d.fromDegrees(252.421875);
+            public static final Rotation2d angleOffset = Rotation2d.fromDegrees(247);
             public static final RevSwerveModuleConstants constants = 
                 new RevSwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
         }
@@ -75,7 +75,7 @@ public final class SwerveConstants
 
 
     public static final class AutoConstants {
-        public static final double kMaxSpeedMetersPerSecond = 0.5;
+        public static final double kMaxSpeedMetersPerSecond = 4.50;
         public static final double kMaxAccelerationMetersPerSecondSquared = 1;
         public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
         public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
