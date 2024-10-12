@@ -6,11 +6,21 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+
+
+
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.util.PathPlannerLogging;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+
 import edu.wpi.first.math.controller.PIDController;
 import frc.robot.SwerveConstants.AutoConstants;
 import frc.robot.subsystems.swerve.SwerveConfig;
+
+import java.sql.Driver;
 import java.text.BreakIterator;
 
 import com.ctre.phoenix.sensors.Pigeon2;
@@ -32,6 +42,7 @@ public class Swerve extends SubsystemBase {
     public SwerveModule[] mSwerveMods;
     public Pigeon2 gyro;
 
+    private Field2d field = new Field2d();
 
 
     public Swerve() {
@@ -52,29 +63,41 @@ public class Swerve extends SubsystemBase {
         swerveOdometry = new SwerveDriveOdometry(SwerveConfig.swerveKinematics, getYaw(), getModulePositions());
         zeroGyro();
 
+        
+    RobotConfig config;
+    try { 
+        config = RobotConfig.fromGUISettings();
 
-            AutoBuilder.configureHolonomic(
-            this::getPose, // Robot pose supplier
-            this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
-            this::getSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds            new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
-            SwerveConfig.pathFollowerConfig,
-
-            () -> {
-              // Boolean supplier that controls when the path will be mirrored for the red alliance
-              // This will flip the path being followed to the red side of the field.
-              // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-              var alliance = DriverStation.getAlliance();
-              if (alliance.isPresent()) {
-                return alliance.get() == DriverStation.Alliance.Red;
-              }
-              return false;
-            },
-            this // Reference to this subsystem to set requirements
-            );
+        AutoBuilder.configure(
+        this::getPose, // Robot pose supplier
+        this::resetOdometry,
+        this::getSpeeds,
+        (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+            new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+                    new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+            ),
+            config,
 
 
+
+
+
+        () -> {
+
+            var alliance = DriverStation.getAlliance();
+            if (alliance.isPresent()) {
+            return alliance.get() == DriverStation.Alliance.Red;
+            }
+            return false;
+        },
+        this // Reference to this subsystem to set requirements
+        );
+    } catch (Exception e) {
+        DriverStation.reportError("Failed to load PathPlanner config and configure AutoBuilder", e.getStackTrace());    }
+
+        PathPlannerLogging.setLogActivePathCallback((poses) -> field.getObject("path").setPoses(poses));
+        SmartDashboard.putData("Field", field);
 
     }
     private static ChassisSpeeds correctForDynamics(ChassisSpeeds originalSpeeds) {
@@ -87,7 +110,7 @@ public class Swerve extends SubsystemBase {
         Twist2d twistForPose = GeometryUtils.log(futureRobotPose);
         ChassisSpeeds updatedSpeeds =
             new ChassisSpeeds(
-                twistForPose.dx / LOOP_TIME_S,
+                twistForPose.dx / LOOP_TIME_S,  
                 twistForPose.dy / LOOP_TIME_S,
                 twistForPose.dtheta / LOOP_TIME_S);
         return updatedSpeeds;
@@ -135,10 +158,12 @@ public class Swerve extends SubsystemBase {
             mod.setDesiredState(desiredStates[mod.getModuleNumber()], false);
         }
     }    
+
     public Pose2d getPose() {
         Pose2d p =  swerveOdometry.getPoseMeters();
         return new Pose2d(-p.getX(),-p.getY(),  p.getRotation());
     }
+
     public void resetOdometry(Pose2d pose) {
         
         swerveOdometry.resetPosition(new Rotation2d(), getModulePositions(), pose);
@@ -198,6 +223,7 @@ public class Swerve extends SubsystemBase {
             SmartDashboard.putNumber("REV Mod " + mod.getModuleNumber() + " Velocity", mod.getState().speedMetersPerSecond); 
      
         }
+
     }
 
 

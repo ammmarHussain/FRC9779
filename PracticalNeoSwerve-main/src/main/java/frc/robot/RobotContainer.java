@@ -3,6 +3,7 @@ package frc.robot;
 import java.util.List;
 
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -15,6 +16,9 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -22,13 +26,15 @@ import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.commands.*;
-import frc.robot.subsystems.Flywheel;
+// import frc.robot.subsystems.Flywheel;
 import frc.robot.subsystems.PoseEstimator;
-import frc.robot.subsystems.Intake;
+// import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.swerve.Swerve;
 
 import frc.robot.autos.exampleAuto;
 import frc.robot.subsystems.swerve.SwerveConfig;
+import frc.robot.subsystems.swerve.Swerve;
+
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -37,6 +43,10 @@ import frc.robot.subsystems.swerve.SwerveConfig;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+    private final SendableChooser<Command> autoChooser;
+
+    
+    private final Field2d m_field = new Field2d();
 
     /* Controllers */
     private final Joystick driver = new Joystick(0);
@@ -45,14 +55,15 @@ public class RobotContainer {
 	private final int translationAxis = XboxController.Axis.kLeftY.value;
 	private final int strafeAxis = XboxController.Axis.kLeftX.value;
 	private final int rotationAxis = XboxController.Axis.kRightX.value;
+    // private DriveSubsytemPathPlanner robot = new DriveSubsystemPathPlanner();
 
     /* Driver Buttons */
     private final JoystickButton zeroGyro = new JoystickButton(driver, XboxController.Button.kY.value);
     private final JoystickButton robotCentric = new JoystickButton(driver, XboxController.Button.kLeftBumper.value);
-
+    private final JoystickButton resetOdom = new JoystickButton(driver, XboxController.Button.kA.value);
     private final JoystickButton dampen = new JoystickButton(driver, XboxController.Button.kRightBumper.value);
     
-    private final JoystickButton intake = new JoystickButton(driver, XboxController.Button.kRightTrigger.value);
+    // private final JoystickButton intake = new JoystickButton(driver, XboxController.Button.kRightTrigger.value);
 	
     private final POVButton up = new POVButton(driver, 90);
     private final POVButton down = new POVButton(driver, 270);
@@ -61,10 +72,11 @@ public class RobotContainer {
 
     /* Subsystems */
     private final Swerve s_Swerve = new Swerve();
-    private final Intake s_Intake = new Intake();
+    // private final Intake s_Intake = new Intake();
     private final PoseEstimator s_PoseEstimator = new PoseEstimator();
-    private final Flywheel s_Flywheel = new Flywheel();
+    // private final Flywheel s_Flywheel = new Flywheel();
 
+    
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
@@ -82,6 +94,9 @@ public class RobotContainer {
 
 
 
+    // boolean isCompetition = true;
+    autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", autoChooser);
 
         // Configure the button bindings
         configureButtonBindings();
@@ -96,7 +111,9 @@ public class RobotContainer {
     private void configureButtonBindings() {
         /* Driver Buttons */
         zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroGyro()));
-	intake.onTrue(new InstantCommand(() -> s_Intake.intake()));
+        resetOdom.onTrue(new InstantCommand(() -> s_Swerve.resetOdometry(new Pose2d(3,3, Rotation2d.fromDegrees(0)))));
+        
+	// intake.onTrue(new InstantCommand(() -> s_Intake.intake()));
 
 
         //heading lock bindings
@@ -118,7 +135,9 @@ public class RobotContainer {
             );
 
 
-    }
+    } 
+
+   
 
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -127,9 +146,11 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
             // 1. Create trajectory settings
-            return new PathPlannerAuto("test");
+            s_Swerve.resetOdometry(s_Swerve.getPose());
+            // return new PathPlannerAuto("New Auto");
+            return autoChooser.getSelected();
         
     }
-}
+}   
 
     

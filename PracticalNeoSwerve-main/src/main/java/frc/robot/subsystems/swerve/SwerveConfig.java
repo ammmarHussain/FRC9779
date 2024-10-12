@@ -4,9 +4,7 @@ import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import com.ctre.phoenix.sensors.SensorTimeBase;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
-import com.pathplanner.lib.util.ReplanningConfig;
+
 import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -21,8 +19,8 @@ public class SwerveConfig
     public CANCoderConfiguration canCoderConfig;
 
     //
-    public static final IdleMode driveIdleMode = IdleMode.kCoast;
-    public static final IdleMode angleIdleMode = IdleMode.kCoast;
+    public static final IdleMode driveIdleMode = IdleMode.kBrake;
+    public static final IdleMode angleIdleMode = IdleMode.kBrake;
     public static final double drivePower = 1;
     public static final double anglePower = .9;
 
@@ -102,19 +100,11 @@ public class SwerveConfig
 
     /* Swerve Profiling Values */
     /** Meters per Second */
-    public static final double maxSpeed = 4.0;
+    public static final double maxSpeed = 6.0;
     /** Radians per Second */
     public static final double maxAngularVelocity = 5.0; //max 10 or.....
     
-    public static final HolonomicPathFollowerConfig pathFollowerConfig = new HolonomicPathFollowerConfig(
-        new PIDConstants(1,0,0),
-        new PIDConstants(1,0,0),
-        maxSpeed,
-        24.975/2,
-        new ReplanningConfig()
-        );
- 
-   
+
 
     public SwerveConfig()
     {

@@ -1,7 +1,10 @@
 package frc.robot;
 
+import java.util.HashMap;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.util.swerveUtil.RevSwerveModuleConstants;
 
 
@@ -75,7 +78,7 @@ public final class SwerveConstants
 
 
     public static final class AutoConstants {
-        public static final double kMaxSpeedMetersPerSecond = 4.50;
+        public static final double kMaxSpeedMetersPerSecond = 6.00;
         public static final double kMaxAccelerationMetersPerSecondSquared = 1;
         public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
         public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
@@ -87,6 +90,7 @@ public final class SwerveConstants
         public static final TrapezoidProfile.Constraints kThetaControllerConstraints =
             new TrapezoidProfile.Constraints(
                 kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
+
     }
 
      
